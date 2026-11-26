@@ -766,20 +766,22 @@
         }
       }
 
-      if (state.selectedTheme === 'castle') {
+ if (state.selectedTheme === 'castle') {
         if (bgImg) bgImg.src = 'map.png';
-        
-        goalBox.style.cssText = "position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); width: 34%; height: 18%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 11px; color: #5c4033;";
 
+        // 大目標（map-goal-box）
+        goalBox.style.cssText = "position: absolute; top: 0%; left: 31%; width: 40%; height: 24%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 14px; line-height: 1.25; color: #5c4033;";
+
+        // 8つの鍵（map-key-box-0 〜 7）
         const castleCoords = [
-          {top: '9%', left: '7%', width: '24%', height: '13%'},
-          {top: '17%', right: '7%', width: '24%', height: '13%'},
-          {top: '39%', right: '6%', width: '24%', height: '13%'},
-          {bottom: '23%', right: '7%', width: '24%', height: '13%'},
-          {bottom: '5%', right: '23%', width: '28%', height: '13%'},
-          {bottom: '17%', left: '7%', width: '28%', height: '13%'},
-          {top: '65%', left: '6%', width: '24%', height: '13%'},
-          {top: '33%', left: '6%', width: '24%', height: '13%'}
+          {top: '21%', left: '11%', width: '24%', height: '13%'}, // 0: map-key-box-0
+          {top: '11%', left: '76%', width: '24%', height: '13%'}, // 1: map-key-box-1
+          {top: '25%', left: '67%', width: '24%', height: '13%'}, // 2: map-key-box-2
+          {top: '45%', left: '73%', width: '24%', height: '13%'}, // 3: map-key-box-3
+          {top: '66%', left: '64%', width: '28%', height: '13%'}, // 4: map-key-box-4
+          {top: '53%', left: '40%', width: '28%', height: '13%'}, // 5: map-key-box-5
+          {top: '48%', left: '5%',  width: '24%', height: '13%'}, // 6: map-key-box-6
+          {top: '80%', left: '26%', width: '24%', height: '13%'}  // 7: 8個目（map-key-box-8表記分）
         ];
         castleCoords.forEach((coord, i) => {
           const box = document.getElementById(`map-key-box-${i}`);
