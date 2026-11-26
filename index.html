@@ -139,6 +139,44 @@
       border: none !important;
       box-shadow: none !important;
     }
+/* ▼ ここから追加（マップ完成時の🎉演出） ▼ */
+    .celebrate-burst {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .celebrate-emoji {
+      font-size: 64px;
+      animation: popCelebrate 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+    }
+
+    @keyframes popCelebrate {
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.4) rotate(-15deg);
+      }
+      25% {
+        opacity: 1;
+        transform: translateY(-10px) scale(1.15) rotate(8deg);
+      }
+      65% {
+        opacity: 1;
+        transform: translateY(-28px) scale(1) rotate(-4deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-56px) scale(0.9) rotate(6deg);
+      }
+    }
+    /* ▲ ここまで追加 ▲ */
+  
+  
   </style>
 </head>
 <body>
@@ -903,14 +941,26 @@
       exportElementAsPng(gridRoot, 'mandala-chart.png');
     }
 
-    function saveMapImage() {
+  function saveMapImage() {
       const mapCanvas = document.getElementById('journey-map-canvas');
       exportElementAsPng(mapCanvas, `journey-map-${state.selectedTheme || 'map'}.png`);
-    }
+      showCelebrateBurst();
+    }  }
 
     function closeModal() {
       document.getElementById('toast-modal').classList.add('hidden');
     }
+    // ▼ ここから追加（🎉演出の表示関数） ▼
+    function showCelebrateBurst() {
+      const wrap = document.createElement('div');
+      wrap.className = 'celebrate-burst';
+      wrap.innerHTML = '<div class="celebrate-emoji">🎉</div>';
+      document.body.appendChild(wrap);
+      setTimeout(() => {
+        wrap.remove();
+      }, 1350);
+    }
+    // ▲ ここまで追加 ▲
 // ▼ ここから追加（PC引き継ぎ用URLコピー） ▼
     async function copyPcShareUrl() {
       try {
