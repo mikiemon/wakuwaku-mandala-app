@@ -261,9 +261,9 @@
         <div class="flex justify-between items-center gap-1.5 bg-white p-3 rounded-xl border border-amber-200 shadow-sm">
           <h2 class="text-sm font-bold text-amber-900">ステップ4：<br>マンダラチャート</h2>
           <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="saveMandalaImage()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow">
-              💾 画像<br>保存
-            </button>
+<button type="button" onclick="saveMandalaImage()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg shadow leading-tight text-center">
+  📥 画像<br>保存
+</button>
             <button type="button" onclick="toggleGridMode()" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow" id="zoom-toggle-btn">
               🔍 拡大スクロール表示
             </button>
@@ -408,24 +408,14 @@
       </div>
 
       <p class="text-xs text-amber-800">お気に入りのテーマでマップが完成しました♪</p>
-<!-- ▼ ここから追加（ドラッグ調整用ボタン＆座標表示欄） ▼ -->
-      <button type="button" onclick="toggleDragAdjust()" id="drag-adjust-btn" class="w-full bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-2 rounded-xl text-xs transition">
-        🎯 文字をドラッグして座標を出す
-      </button>
-      <textarea id="coord-output-box" rows="2" readonly onclick="this.select()" placeholder="ドラッグするとここに座標が出るよ（タップで全選択）" class="hidden w-full p-2 text-[11px] bg-amber-50 border border-amber-200 rounded-xl text-amber-900"></textarea>
-      <!-- ▲ ここまで追加 ▲ -->
 
       <div class="flex gap-2">
-        <button type="button" onclick="saveMapImage()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow">💾 画像保存</button>
+        <button type="button" onclick="saveMapImage()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow">📥 画像保存</button>
         <button type="button" onclick="closeModal()" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white font-black py-2.5 rounded-xl text-xs shadow">閉じる</button>
       </div>
 
       
-      <div class="flex gap-2">
-        <button type="button" onclick="saveMapImage()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow">💾 画像保存</button>
-        <button type="button" onclick="closeModal()" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white font-black py-2.5 rounded-xl text-xs shadow">閉じる</button>
-      </div>
-    </div>
+   </div>
   </div>
 
   <script>
