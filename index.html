@@ -39,7 +39,26 @@
       flex-direction: column;
       position: relative;
     }
+/* ▼ ここから追加（PC・タブレット自動レスポンシブ） ▼ */
+    @media (min-width: 768px) {
+      #app-shell,
+      #nav-bar {
+        max-width: 760px;
+      }
 
+      #app-shell .m-cell {
+        height: 60px;
+        font-size: 11px;
+        padding: 4px;
+      }
+
+      #app-shell .m-center {
+        min-height: 184px;
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+    /* ▲ ここまで追加 ▲ */
     .rainbow-border-card {
       background: linear-gradient(#ffffff, #ffffff) padding-box,
                   linear-gradient(135deg, #ff5e99 0%, #ff9a5a 25%, #ffd166 50%, #4ecdc4 75%, #6c8ef5 100%) border-box;
@@ -264,6 +283,11 @@
 <button type="button" onclick="saveMandalaImage()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg shadow leading-tight text-center">
   📥 画像<br>保存
 </button>
+           <!-- ▼ ここから追加（PC用URLコピーボタン） ▼ -->
+    <button type="button" onclick="copyPcShareUrl()" class="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold rounded-lg shadow leading-tight text-center">
+      🔗 PC用<br>URL
+    </button>
+    <!-- ▲ ここまで追加 ▲ -->
             <button type="button" onclick="toggleGridMode()" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow" id="zoom-toggle-btn">
               🔍 拡大スクロール表示
             </button>
@@ -438,7 +462,30 @@
       zoomMode: false,
       selectedTheme: 'castle'
     };
-
+// ▼ ここから追加（URLパラメータからデータ復元） ▼
+    (function restoreFromUrlQuery() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const encoded = params.get('data');
+        if (!encoded) return;
+        const jsonStr = decodeURIComponent(escape(atob(encoded)));
+        const parsed = JSON.parse(jsonStr);
+        if (parsed && typeof parsed === 'object') {
+          state = {
+            ...state,
+            ...parsed,
+            subGoals: Array.isArray(parsed.subGoals) ? parsed.subGoals.slice(0, 8) : state.subGoals,
+            actions: Array.isArray(parsed.actions) ? parsed.actions : state.actions,
+            currentStep: 4
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      } catch (e) {
+        console.warn('URL復元に失敗:', e);
+      }
+    })();
+    // ▲ ここまで追加 ▲
     if (!Array.isArray(state.keywordPool)) {
       state.keywordPool = [...defaultChips];
     }
@@ -864,7 +911,42 @@
     function closeModal() {
       document.getElementById('toast-modal').classList.add('hidden');
     }
-// ▼ ここから追加（ドラッグ座標調整機能） ▼
+// ▼ ここから追加（PC引き継ぎ用URLコピー） ▼
+    async function copyPcShareUrl() {
+      try {
+        const payload = {
+          nickname: state.nickname,
+          period: state.period,
+          mainGoal: state.mainGoal,
+          subGoals: state.subGoals,
+          actions: state.actions,
+          selectedTheme: state.selectedTheme
+        };
+        const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.searchParams.set('data', base64);
+        const shareUrl = url.toString();
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+        } else {
+          const temp = document.createElement('textarea');
+          temp.value = shareUrl;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+        }
+        alert('PCで開く用のURLをコピーしたよ！PCに送って開くとデータが引き継がれるよ✨');
+      } catch (err) {
+        console.error(err);
+        alert('URLのコピーができなかったみたい。別のブラウザやHTTPS環境で試してみてね！');
+      }
+    }
+    // ▲ ここまで追加 ▲
+    
+    // ▼ ここから追加（ドラッグ座標調整機能） ▼
     let dragAdjustMode = false;
 
     function toggleDragAdjust() {
