@@ -408,6 +408,19 @@
       </div>
 
       <p class="text-xs text-amber-800">お気に入りのテーマでマップが完成しました♪</p>
+<!-- ▼ ここから追加（ドラッグ調整用ボタン＆座標表示欄） ▼ -->
+      <button type="button" onclick="toggleDragAdjust()" id="drag-adjust-btn" class="w-full bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-2 rounded-xl text-xs transition">
+        🎯 文字をドラッグして座標を出す
+      </button>
+      <textarea id="coord-output-box" rows="2" readonly onclick="this.select()" placeholder="ドラッグするとここに座標が出るよ（タップで全選択）" class="hidden w-full p-2 text-[11px] bg-amber-50 border border-amber-200 rounded-xl text-amber-900"></textarea>
+      <!-- ▲ ここまで追加 ▲ -->
+
+      <div class="flex gap-2">
+        <button type="button" onclick="saveMapImage()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow">💾 画像保存</button>
+        <button type="button" onclick="closeModal()" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white font-black py-2.5 rounded-xl text-xs shadow">閉じる</button>
+      </div>
+
+      
       <div class="flex gap-2">
         <button type="button" onclick="saveMapImage()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow">💾 画像保存</button>
         <button type="button" onclick="closeModal()" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white font-black py-2.5 rounded-xl text-xs shadow">閉じる</button>
@@ -855,7 +868,73 @@
     function closeModal() {
       document.getElementById('toast-modal').classList.add('hidden');
     }
+// ▼ ここから追加（ドラッグ座標調整機能） ▼
+    let dragAdjustMode = false;
 
+    function toggleDragAdjust() {
+      dragAdjustMode = !dragAdjustMode;
+      const btn = document.getElementById('drag-adjust-btn');
+      const out = document.getElementById('coord-output-box');
+      const boxes = document.querySelectorAll('#map-goal-box, .map-key-box');
+
+      if (btn) {
+        btn.textContent = dragAdjustMode ? '✅ ドラッグ調整モード中（もう一度押すと終了）' : '🎯 文字をドラッグして座標を出す';
+      }
+      if (out) {
+        out.classList.toggle('hidden', !dragAdjustMode);
+      }
+
+      boxes.forEach((box) => {
+        box.style.cursor = dragAdjustMode ? 'move' : 'default';
+        box.style.outline = dragAdjustMode ? '1px dashed #e67e22' : 'none';
+        box.style.touchAction = dragAdjustMode ? 'none' : 'auto';
+        box.onpointerdown = dragAdjustMode ? startBoxDrag : null;
+      });
+    }
+
+    function startBoxDrag(e) {
+      e.preventDefault();
+      const box = e.currentTarget;
+      const parent = document.getElementById('journey-map-canvas');
+      if (!parent) return;
+
+      const pRect = parent.getBoundingClientRect();
+      box.setPointerCapture(e.pointerId);
+
+      const onMove = (ev) => {
+        const bRect = box.getBoundingClientRect();
+        let leftPct = ((ev.clientX - pRect.left - bRect.width / 2) / pRect.width) * 100;
+        let topPct = ((ev.clientY - pRect.top - bRect.height / 2) / pRect.height) * 100;
+
+        leftPct = Math.max(0, Math.min(95, Math.round(leftPct)));
+        topPct = Math.max(0, Math.min(95, Math.round(topPct)));
+
+        box.style.transform = 'none';
+        box.style.right = 'auto';
+        box.style.bottom = 'auto';
+        box.style.left = `${leftPct}%`;
+        box.style.top = `${topPct}%`;
+
+        const wPct = Math.round((bRect.width / pRect.width) * 100);
+        const hPct = Math.round((bRect.height / pRect.height) * 100);
+        const out = document.getElementById('coord-output-box');
+        if (out) {
+          out.value = `{top: '${topPct}%', left: '${leftPct}%', width: '${wPct}%', height: '${hPct}%'}, // ${box.id}`;
+        }
+      };
+
+      const onUp = () => {
+        if (box.hasPointerCapture(e.pointerId)) {
+          box.releasePointerCapture(e.pointerId);
+        }
+        box.removeEventListener('pointermove', onMove);
+        box.removeEventListener('pointerup', onUp);
+      };
+
+      box.addEventListener('pointermove', onMove);
+      box.addEventListener('pointerup', onUp);
+    }
+    // ▲ ここまで追加 ▲
     function fillSampleData() {
       state.nickname = 'ニックネーム';
       state.period = '3年後';
