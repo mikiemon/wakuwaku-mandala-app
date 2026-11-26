@@ -2,12 +2,14 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ワクワクマンダラチャート</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- 画像保存用ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -44,7 +46,6 @@
       border: 3px solid transparent;
     }
 
-    /* 寒色少なめの虹色グラデーション（大目標用） */
     .rainbow-goal-bg {
       background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 35%, #ffecd2 70%, #ffeaa7 100%);
     }
@@ -104,7 +105,6 @@
       font-size: 11px;
     }
 
-    /* 拡大スクロール時のスタイル強化 */
     .mandala-scroll-container {
       overflow-x: auto;
       overflow-y: hidden;
@@ -112,14 +112,21 @@
       touch-action: pan-x pan-y;
       width: 100%;
     }
+
+    /* マップの文字枠の背景・枠線・影を一括で透明にする */
+    #map-goal-box,
+    .map-key-box {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
   </style>
 </head>
 <body>
 
-  <!-- スマホ縦画面専用コンテナ（最大幅430px） -->
   <div id="app-shell">
 
-    <!-- スティッキーヘッダー＆ナビゲーション（トップページでは非表示） -->
+    <!-- スティッキーヘッダー＆ナビゲーション -->
     <div id="app-header-container" class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-amber-100 shrink-0 shadow-xs hidden">
       <header class="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-900 px-4 py-2.5 text-center flex items-center justify-between">
         <button type="button" onclick="goToStep('opening')" class="bg-white/50 hover:bg-white text-amber-900 text-[11px] font-black px-2.5 py-1 rounded-xl transition">🏠 トップ</button>
@@ -142,9 +149,7 @@
     <!-- メインコンテンツ領域 -->
     <main class="flex-1 px-3.5 py-4 space-y-4 pb-20">
 
-      <!-- =========================================================
-           TOP PAGE: オープニング画面
-      ========================================================= -->
+      <!-- TOP PAGE -->
       <section id="step-opening" class="step-section space-y-5 py-6">
         <div class="text-center space-y-3">
           <div class="inline-block bg-amber-100 text-amber-800 font-black text-xs px-3.5 py-1 rounded-full border border-amber-200 shadow-xs">
@@ -174,13 +179,11 @@
         </div>
       </section>
 
-      <!-- =========================================================
-           STEP 1: 基本設定＆大目標
-      ========================================================= -->
+      <!-- ステップ１ -->
       <section id="step1" class="step-section space-y-4 hidden">
         <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 rounded-2xl border border-amber-200 flex items-center justify-between gap-2">
           <div>
-            <span class="text-[10px] font-extrabold text-amber-700 bg-white px-2 py-0.5 rounded-full border border-amber-200">STEP 1</span>
+            <span class="text-[10px] font-extrabold text-amber-700 bg-white px-2 py-0.5 rounded-full border border-amber-200">ステップ１</span>
             <h2 class="text-sm font-black text-amber-900 mt-1">基本設定＆大目標</h2>
             <p class="text-xs text-amber-700 mt-0.5">未来の設計図の土台を決めよう！</p>
           </div>
@@ -189,24 +192,17 @@
           </button>
         </div>
 
-        <!-- ニックネーム -->
         <div class="bg-white p-3.5 rounded-2xl border border-amber-200 shadow-xs space-y-2">
-          <label for="input-nickname" class="block text-xs font-extrabold text-amber-900">
-            ニックネーム
-          </label>
-          <input type="text" id="input-nickname" oninput="handleStep1Change()" placeholder="例：みきちゃん" value="みきちゃん" class="w-full px-3.5 py-2.5 rounded-xl border border-amber-200 bg-amber-50/50 focus:bg-white focus:border-amber-400 focus:outline-none font-bold text-amber-900">
+          <label for="input-nickname" class="block text-xs font-extrabold text-amber-900">ニックネーム</label>
+          <input type="text" id="input-nickname" oninput="handleStep1Change()" placeholder="例：ニックネーム" value="ニックネーム" class="w-full px-3.5 py-2.5 rounded-xl border border-amber-200 bg-amber-50/50 focus:bg-white focus:border-amber-400 focus:outline-none font-bold text-amber-900">
         </div>
 
-        <!-- 達成時期選択 -->
         <div class="bg-white p-3.5 rounded-2xl border border-amber-200 shadow-xs space-y-2.5">
-          <label class="block text-xs font-extrabold text-amber-900">
-            達成時期
-          </label>
+          <label class="block text-xs font-extrabold text-amber-900">達成時期</label>
           <div class="flex flex-wrap gap-1.5 mb-2" id="timeframe-buttons-container"></div>
           <input type="text" id="input-timeframe" oninput="handleTimeframeCustomInput(this.value)" placeholder="自由入力も可" class="w-full px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50/50 focus:bg-white focus:border-amber-400 focus:outline-none font-bold text-amber-900 text-xs">
         </div>
 
-        <!-- 一番叶えたい大目標 -->
         <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-xs space-y-2">
           <label for="input-big-goal" class="flex items-center gap-1.5 text-xs font-black text-amber-900">
             <span>👑</span>
@@ -215,7 +211,6 @@
           <textarea id="input-big-goal" rows="3" oninput="handleStep1Change()" placeholder="例：家族みんなが笑顔で心地よく暮らせる仕組みをつくる" class="w-full px-3.5 py-2.5 rounded-xl border border-amber-200 bg-amber-50/50 focus:bg-white focus:border-amber-400 focus:outline-none font-bold text-amber-900 leading-snug"></textarea>
         </div>
 
-        <!-- 次へボタン -->
         <div class="pt-1 pb-4">
           <button type="button" onclick="goToStep(2)" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-95 text-white font-black py-3.5 rounded-2xl shadow-md text-sm flex items-center justify-center gap-2 active:scale-98 transition">
             <span>次へ：8つの鍵を選ぶ ➔</span>
@@ -223,13 +218,11 @@
         </div>
       </section>
 
-      <!-- =========================================================
-           STEP 2: 8つの鍵
-      ========================================================= -->
+      <!-- STEP 2 -->
       <section id="step2" class="step-section space-y-4 hidden">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-amber-100">
           <h2 class="text-lg font-bold text-amber-900 mb-1">ステップ2：8つの鍵を選ぼう</h2>
-          <p class="text-xs text-amber-700 mb-3">下のチップをタップして選択！もう一度タップすると削除できます。自由なキーワード追加もOK♪</p>
+          <p class="text-xs text-amber-700 mb-3">下のチップをタップして選択！もう一度タップすると削除できます。</p>
           
           <div class="flex gap-2 mb-3">
             <input type="text" id="custom-chip-input" placeholder="新しいキーワードを入力" class="flex-1 p-2 text-xs border border-amber-200 rounded-lg bg-amber-50/50">
@@ -250,9 +243,7 @@
         </div>
       </section>
 
-      <!-- =========================================================
-           STEP 3: 行動プラン（3x3配置）
-      ========================================================= -->
+      <!-- STEP 3 -->
       <section id="step3" class="step-section space-y-4 hidden">
         <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
           <h2 class="text-sm font-bold text-amber-900">ステップ3：64のアクションプラン</h2>
@@ -265,15 +256,18 @@
         </div>
       </section>
 
-      <!-- =========================================================
-           STEP 4: マンダラチャート（完全に元のまま）
-      ========================================================= -->
+      <!-- STEP 4: マンダラチャート -->
       <section id="step4" class="step-section space-y-3.5 hidden">
-        <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-amber-200 shadow-sm">
+        <div class="flex justify-between items-center gap-1.5 bg-white p-3 rounded-xl border border-amber-200 shadow-sm">
           <h2 class="text-sm font-bold text-amber-900">ステップ4：マンダラチャート</h2>
-          <button type="button" onclick="toggleGridMode()" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg shadow" id="zoom-toggle-btn">
-            🔍 拡大スクロール表示
-          </button>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="saveMandalaImage()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow">
+              💾 画像保存
+            </button>
+            <button type="button" onclick="toggleGridMode()" class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow" id="zoom-toggle-btn">
+              🔍 拡大スクロール表示
+            </button>
+          </div>
         </div>
 
         <div id="mandala-scroll-wrapper" class="mandala-scroll-container bg-white p-2 rounded-2xl shadow border border-amber-200">
@@ -286,14 +280,12 @@
         </div>
       </section>
 
-      <!-- =========================================================
-           STEP 5: ワクワクマップ設定
-      ========================================================= -->
+      <!-- STEP 5 -->
       <section id="step5" class="step-section space-y-4 hidden">
         <div class="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 p-6 rounded-3xl shadow-lg border-2 border-amber-300 space-y-4">
           <div class="text-center space-y-1">
             <span class="bg-amber-600 text-white text-[10px] px-3 py-1 rounded-full font-bold">ワクワクマップ設定</span>
-            <h2 id="card-title-nickname" class="text-xl font-bold text-amber-900 pt-2">のみきちゃん のマップデータ</h2>
+            <h2 id="card-title-nickname" class="text-xl font-bold text-amber-900 pt-2">ニックネーム のマップデータ</h2>
             <p id="card-text-period" class="text-xs text-amber-700">達成時期：3年後</p>
           </div>
 
@@ -316,9 +308,7 @@
         </div>
       </section>
 
-      <!-- =========================================================
-           STEP 6: マップデザインを選ぶ
-      ========================================================= -->
+      <!-- STEP 6 -->
       <section id="step6" class="step-section space-y-4 hidden">
         <div class="text-center space-y-1 my-2">
           <span class="bg-amber-100 text-amber-900 text-[11px] px-3 py-1 rounded-full font-bold">ステップ6</span>
@@ -334,9 +324,7 @@
                 <h3 class="font-bold text-amber-900 text-sm">マジカルキャッスル</h3>
               </div>
             </div>
-            <div class="check-icon absolute top-4 right-4 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden">
-              ✓
-            </div>
+            <div class="check-icon absolute top-4 right-4 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden">✓</div>
           </div>
 
           <div onclick="selectTheme('scrapbook')" id="card-scrapbook" class="theme-card relative bg-white p-4 rounded-2xl shadow-sm border-2 border-amber-200 cursor-pointer transition-all duration-200">
@@ -346,9 +334,7 @@
                 <h3 class="font-bold text-amber-900 text-sm">メモリアルジャーニー</h3>
               </div>
             </div>
-            <div class="check-icon absolute top-4 right-4 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden">
-              ✓
-            </div>
+            <div class="check-icon absolute top-4 right-4 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden">✓</div>
           </div>
 
           <div onclick="selectTheme('patisserie')" id="card-patisserie" class="theme-card relative bg-white p-4 rounded-2xl shadow-sm border-2 border-amber-200 cursor-pointer transition-all duration-200">
@@ -358,15 +344,12 @@
                 <h3 class="font-bold text-amber-900 text-sm">ハピネスパティスリー</h3>
               </div>
             </div>
-            <div class="check-icon absolute top-4 right-4 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden">
-              ✓
-            </div>
+            <div class="check-icon absolute top-4 right-4 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden">✓</div>
           </div>
         </div>
 
         <div class="flex gap-2 pt-2 pb-4">
           <button type="button" onclick="goToStep(5)" class="w-1/3 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">戻る</button>
-          <!-- ここでデザイン完了時に背景画像付きジャーニーマップを表示する関数を呼び出す -->
           <button type="button" onclick="createJourneyMap()" class="w-2/3 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl shadow text-xs">このデザインでマップを作成する ➔</button>
         </div>
       </section>
@@ -396,7 +379,7 @@
     </nav>
   </div>
 
-  <!-- トーストモーダル（背景画像付きジャーニーマップ完成表示用） -->
+  <!-- マップ完成プレビュー モーダル -->
   <div id="toast-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-2 overflow-y-auto">
     <div class="w-full max-w-[380px] bg-white rounded-3xl p-4 text-center shadow-2xl space-y-3 border border-amber-100 my-auto">
       <div class="flex justify-between items-center px-2">
@@ -404,44 +387,31 @@
         <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-600 font-bold px-2 py-1 text-sm">✕</button>
       </div>
 
-      <!-- 背景画像 ＋ テキストレイアウトキャンバス -->
+      <!-- 背景画像 ＋ 文字のみ配置キャンバス -->
       <div id="journey-map-canvas" class="relative w-[340px] h-[480px] mx-auto shadow-md rounded-2xl overflow-hidden border border-amber-200 bg-white">
         <img id="map-bg-image" src="map.png" alt="Journey Map Background" class="absolute inset-0 w-full h-full object-cover">
         
-        <!-- 中央大目標 -->
-        <div class="absolute top-[46%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[34%] h-[18%] flex items-center justify-center text-center p-1 font-bold text-amber-900 text-[11px] leading-tight overflow-hidden bg-white/80 backdrop-blur-[1px] rounded-xl border border-amber-300 shadow-xs">
+        <!-- 大目標テキスト専用エリア -->
+        <div id="map-goal-box" class="absolute flex items-center justify-center text-center p-0.5 font-black text-[#5c4033] leading-tight overflow-hidden">
           <span id="map-goal-text">大目標</span>
         </div>
 
         <!-- 周辺8つの鍵 -->
-        <div class="absolute top-[8%] left-[6%] w-[26%] h-[15%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-0">鍵1</span>
-        </div>
-        <div class="absolute top-[16%] right-[5%] w-[28%] h-[15%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-1">鍵2</span>
-        </div>
-        <div class="absolute top-[38%] right-[4%] w-[26%] h-[15%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-2">鍵3</span>
-        </div>
-        <div class="absolute bottom-[22%] right-[5%] w-[28%] h-[15%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-3">鍵4</span>
-        </div>
-        <div class="absolute bottom-[4%] right-[22%] w-[32%] h-[15%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-4">鍵5</span>
-        </div>
-        <div class="absolute bottom-[16%] left-[6%] w-[32%] h-[16%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-5">鍵6</span>
-        </div>
-        <div class="absolute top-[64%] left-[4%] w-[28%] h-[15%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-6">鍵7</span>
-        </div>
-        <div class="absolute top-[32%] left-[4%] w-[26%] h-[15%] flex items-center justify-center text-center p-1 text-amber-900 text-[9px] leading-tight overflow-hidden bg-white/80 rounded-lg border border-amber-300 shadow-xs">
-          <span id="map-key-7">鍵8</span>
-        </div>
+        <div id="map-key-box-0" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-0">鍵1</span></div>
+        <div id="map-key-box-1" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-1">鍵2</span></div>
+        <div id="map-key-box-2" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-2">鍵3</span></div>
+        <div id="map-key-box-3" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-3">鍵4</span></div>
+        <div id="map-key-box-4" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-4">鍵5</span></div>
+        <div id="map-key-box-5" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-5">鍵6</span></div>
+        <div id="map-key-box-6" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-6">鍵7</span></div>
+        <div id="map-key-box-7" class="map-key-box absolute flex items-center justify-center text-center p-0.5 font-bold text-[#5c4033] leading-tight overflow-hidden"><span id="map-key-7">鍵8</span></div>
       </div>
 
       <p class="text-xs text-amber-800">お気に入りのテーマでマップが完成しました♪</p>
-      <button type="button" onclick="closeModal()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-black py-2.5 rounded-xl text-xs shadow">閉じる</button>
+      <div class="flex gap-2">
+        <button type="button" onclick="saveMapImage()" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl text-xs shadow">💾 画像保存</button>
+        <button type="button" onclick="closeModal()" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white font-black py-2.5 rounded-xl text-xs shadow">閉じる</button>
+      </div>
     </div>
   </div>
 
@@ -456,7 +426,7 @@
     const periodChips = ["半年後", "1年後", "2年後", "3年後", "5年後", "10年後"];
 
     let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-      nickname: 'みきちゃん',
+      nickname: 'ニックネーム',
       period: '3年後',
       mainGoal: '',
       subGoals: ['', '', '', '', '', '', '', ''],
@@ -563,10 +533,20 @@
       const nickEl = document.getElementById('input-nickname');
       const tfEl = document.getElementById('input-timeframe');
       const goalEl = document.getElementById('input-big-goal');
-      if (nickEl) nickEl.value = state.nickname || 'みきちゃん';
+      if (nickEl) nickEl.value = state.nickname || 'ニックネーム';
       if (tfEl) tfEl.value = state.period || '3年後';
       if (goalEl) goalEl.value = state.mainGoal || '';
       renderPeriodButtons();
+    }
+
+    function handleSubGoalInput(i, val) {
+      state.subGoals[i] = val;
+      saveState();
+      const clearBtn = document.getElementById('clear-subgoal-' + i);
+      if (clearBtn) {
+        if (val) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
     }
 
     function renderStep2() {
@@ -575,8 +555,8 @@
         slotsHtml += `
           <div class="flex items-center gap-2 bg-white p-2 rounded-xl border border-amber-200 shadow-sm">
             <span class="w-8 h-8 flex items-center justify-center bg-amber-100 text-amber-900 font-bold rounded-lg text-sm">${i+1}</span>
-            <input type="text" value="${escapeHtml(state.subGoals[i])}" onchange="state.subGoals[${i}]=this.value; saveState(); renderStep2();" placeholder="鍵 ${i+1}" class="flex-1 p-1.5 border-none bg-transparent focus:outline-none text-sm font-bold text-amber-900">
-            ${state.subGoals[i] ? `<button type="button" onclick="clearSubGoal(${i})" class="text-xs text-gray-400 hover:text-red-500 px-2 font-bold">✕</button>` : ''}
+            <input type="text" value="${escapeHtml(state.subGoals[i])}" oninput="handleSubGoalInput(${i}, this.value)" onchange="renderStep2();" placeholder="鍵 ${i+1}" class="flex-1 p-1.5 border-none bg-transparent focus:outline-none text-sm font-bold text-amber-900">
+            <button id="clear-subgoal-${i}" type="button" onclick="clearSubGoal(${i})" class="${state.subGoals[i] ? '' : 'hidden '}text-xs text-gray-400 hover:text-red-500 px-2 font-bold">✕</button>
           </div>
         `;
       }
@@ -600,7 +580,7 @@
         if (emptyIndex > -1) {
           state.subGoals[emptyIndex] = chip;
         } else {
-          showToast('お知らせ', '8つの鍵はすでにすべて埋まっています。', 'ℹ️');
+          alert('8つの鍵はすでにすべて埋まっています。');
         }
       }
       saveState();
@@ -622,6 +602,11 @@
       input.value = '';
     }
 
+    function handleActionInput(i, j, val) {
+      state.actions[i][j] = val;
+      saveState();
+    }
+
     function renderStep3() {
       const container = document.getElementById('action-sections-container');
       if (!container) return;
@@ -636,7 +621,7 @@
             </div>
             <div class="grid grid-cols-3 gap-1.5 text-center">
               ${[0,1,2,3,4,5,6,7].map(j => `
-                <textarea rows="2" onchange="state.actions[${i}][${j}]=this.value; saveState();" placeholder="行動${j+1}" class="p-1 text-[10px] border border-amber-200 rounded-lg bg-amber-50/30 resize-none font-medium text-amber-900">${escapeHtml(state.actions[i][j])}</textarea>
+                <textarea rows="2" oninput="handleActionInput(${i}, ${j}, this.value)" placeholder="行動${j+1}" class="p-1 text-[10px] border border-amber-200 rounded-lg bg-amber-50/30 resize-none font-medium text-amber-900">${escapeHtml(state.actions[i][j])}</textarea>
               `).join('')}
             </div>
           </div>
@@ -708,7 +693,7 @@
     }
 
     function renderStep5() {
-      const nick = state.nickname || 'みきちゃん';
+      const nick = state.nickname || 'ニックネーム';
       const period = state.period || '3年後';
       const goal = state.mainGoal || '（未設定）';
 
@@ -750,22 +735,13 @@
       });
     }
 
-    // 「このデザインでマップを作成する」を押したときに、背景画像付きジャーニーマップを表示する処理
     function createJourneyMap() {
       saveState();
 
       const bgImg = document.getElementById('map-bg-image');
-      if (bgImg) {
-        if (state.selectedTheme === 'castle') {
-          bgImg.src = 'map.png';
-        } else if (state.selectedTheme === 'scrapbook') {
-          bgImg.src = 'photobook.png';
-        } else if (state.selectedTheme === 'patisserie') {
-          bgImg.src = 'cake.png';
-        }
-      }
-
+      const goalBox = document.getElementById('map-goal-box');
       const goalElem = document.getElementById('map-goal-text');
+
       if (goalElem) {
         goalElem.innerText = state.mainGoal || '大目標';
       }
@@ -777,11 +753,103 @@
         }
       }
 
+      if (state.selectedTheme === 'castle') {
+        if (bgImg) bgImg.src = 'map.png';
+        
+        goalBox.style.cssText = "position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); width: 34%; height: 18%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 11px; color: #5c4033;";
+
+        const castleCoords = [
+          {top: '9%', left: '7%', width: '24%', height: '13%'},
+          {top: '17%', right: '7%', width: '24%', height: '13%'},
+          {top: '39%', right: '6%', width: '24%', height: '13%'},
+          {bottom: '23%', right: '7%', width: '24%', height: '13%'},
+          {bottom: '5%', right: '23%', width: '28%', height: '13%'},
+          {bottom: '17%', left: '7%', width: '28%', height: '13%'},
+          {top: '65%', left: '6%', width: '24%', height: '13%'},
+          {top: '33%', left: '6%', width: '24%', height: '13%'}
+        ];
+        castleCoords.forEach((coord, i) => {
+          const box = document.getElementById(`map-key-box-${i}`);
+          box.style.cssText = `position: absolute; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: bold; color: #5c4033; top: ${coord.top || 'auto'}; bottom: ${coord.bottom || 'auto'}; left: ${coord.left || 'auto'}; right: ${coord.right || 'auto'}; width: ${coord.width}; height: ${coord.height};`;
+        });
+      }
+      else if (state.selectedTheme === 'scrapbook') {
+        if (bgImg) bgImg.src = 'photobook.png';
+
+        goalBox.style.cssText = "position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); width: 34%; height: 18%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 11px; color: #5c4033;";
+
+        const scrapbookCoords = [
+          {top: '9%', left: '7%', width: '24%', height: '13%'},
+          {top: '17%', right: '7%', width: '24%', height: '13%'},
+          {top: '39%', right: '6%', width: '24%', height: '13%'},
+          {bottom: '23%', right: '7%', width: '24%', height: '13%'},
+          {bottom: '5%', right: '23%', width: '28%', height: '13%'},
+          {bottom: '17%', left: '7%', width: '28%', height: '13%'},
+          {top: '65%', left: '6%', width: '24%', height: '13%'},
+          {top: '33%', left: '6%', width: '24%', height: '13%'}
+        ];
+        scrapbookCoords.forEach((coord, i) => {
+          const box = document.getElementById(`map-key-box-${i}`);
+          box.style.cssText = `position: absolute; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: bold; color: #5c4033; top: ${coord.top || 'auto'}; bottom: ${coord.bottom || 'auto'}; left: ${coord.left || 'auto'}; right: ${coord.right || 'auto'}; width: ${coord.width}; height: ${coord.height};`;
+        });
+      }
+      else if (state.selectedTheme === 'patisserie') {
+        if (bgImg) bgImg.src = 'cake.png';
+
+        goalBox.style.cssText = "position: absolute; top: 12%; left: 16%; width: 32%; height: 10%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 9px; color: #5c4033;";
+
+        const cakeCoords = [
+          {top: '25%', left: '12%', width: '24%', height: '13%'},
+          {top: '23%', right: '12%', width: '25%', height: '13%'},
+          {top: '40%', left: '10%', width: '24%', height: '13%'},
+          {top: '40%', right: '10%', width: '25%', height: '13%'},
+          {bottom: '22%', left: '10%', width: '24%', height: '13%'},
+          {bottom: '22%', right: '10%', width: '25%', height: '13%'},
+          {bottom: '7%', left: '32%', width: '36%', height: '12%'},
+          {top: '12%', right: '16%', width: '32%', height: '10%'}
+        ];
+        cakeCoords.forEach((coord, i) => {
+          const box = document.getElementById(`map-key-box-${i}`);
+          box.style.cssText = `position: absolute; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 8px; font-weight: bold; color: #5c4033; top: ${coord.top || 'auto'}; bottom: ${coord.bottom || 'auto'}; left: ${coord.left || 'auto'}; right: ${coord.right || 'auto'}; width: ${coord.width}; height: ${coord.height};`;
+        });
+      }
+
       document.getElementById('toast-modal').classList.remove('hidden');
     }
 
-    function showToast(title, message, icon) {
-      // 必要に応じた通知用
+    async function exportElementAsPng(targetEl, filename) {
+      if (!targetEl || typeof html2canvas !== 'function') {
+        alert('画像保存の準備ができなかったよ。少し待ってから試してみてね。');
+        return;
+      }
+      try {
+        const canvas = await html2canvas(targetEl, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          scale: 2
+        });
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error(err);
+        alert('画像の保存に失敗しちゃった。ローカルで開いている場合はサーバー経由で試してみてね！');
+      }
+    }
+
+    function saveMandalaImage() {
+      const gridRoot = document.getElementById('mandala-grid-root');
+      exportElementAsPng(gridRoot, 'mandala-chart.png');
+    }
+
+    function saveMapImage() {
+      const mapCanvas = document.getElementById('journey-map-canvas');
+      exportElementAsPng(mapCanvas, `journey-map-${state.selectedTheme || 'map'}.png`);
     }
 
     function closeModal() {
@@ -789,7 +857,7 @@
     }
 
     function fillSampleData() {
-      state.nickname = 'みきちゃん';
+      state.nickname = 'ニックネーム';
       state.period = '3年後';
       state.mainGoal = '家族みんなが笑顔で心地よく暮らせる仕組みをつくる';
       state.subGoals = ['仕事', '副業', '家事改善', 'マインド', '子育て', '自分磨き', '人間関係', '家族'];
