@@ -788,20 +788,22 @@
           box.style.cssText = `position: absolute; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: bold; color: #5c4033; top: ${coord.top || 'auto'}; bottom: ${coord.bottom || 'auto'}; left: ${coord.left || 'auto'}; right: ${coord.right || 'auto'}; width: ${coord.width}; height: ${coord.height};`;
         });
       }
-      else if (state.selectedTheme === 'scrapbook') {
+     else if (state.selectedTheme === 'scrapbook') {
         if (bgImg) bgImg.src = 'photobook.png';
 
-        goalBox.style.cssText = "position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); width: 34%; height: 18%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 11px; color: #5c4033;";
+        // 大目標（中央のオーバルフレーム）
+        goalBox.style.cssText = "position: absolute; top: 35%; left: 33%; width: 34%; height: 28%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 12px; line-height: 1.3; color: #5c4033;";
 
+        // 8つの鍵（ドラッグで合わせた確定座標）
         const scrapbookCoords = [
-          {top: '9%', left: '7%', width: '24%', height: '13%'},
-          {top: '17%', right: '7%', width: '24%', height: '13%'},
-          {top: '39%', right: '6%', width: '24%', height: '13%'},
-          {bottom: '23%', right: '7%', width: '24%', height: '13%'},
-          {bottom: '5%', right: '23%', width: '28%', height: '13%'},
-          {bottom: '17%', left: '7%', width: '28%', height: '13%'},
-          {top: '65%', left: '6%', width: '24%', height: '13%'},
-          {top: '33%', left: '6%', width: '24%', height: '13%'}
+          {top: '10%', left: '5%',  width: '24%', height: '13%'}, // map-key-box-0
+          {top: '19%', left: '70%', width: '24%', height: '13%'}, // map-key-box-1
+          {top: '42%', left: '76%', width: '24%', height: '13%'}, // map-key-box-2
+          {top: '66%', left: '52%', width: '24%', height: '13%'}, // map-key-box-3
+          {top: '72%', left: '51%', width: '28%', height: '13%'}, // map-key-box-4
+          {top: '69%', left: '7%',  width: '28%', height: '13%'}, // map-key-box-5
+          {top: '61%', left: '9%',  width: '24%', height: '13%'}, // map-key-box-6
+          {top: '33%', left: '2%',  width: '24%', height: '13%'}  // map-key-box-7
         ];
         scrapbookCoords.forEach((coord, i) => {
           const box = document.getElementById(`map-key-box-${i}`);
