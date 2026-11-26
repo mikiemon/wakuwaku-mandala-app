@@ -806,20 +806,22 @@
           box.style.cssText = `position: absolute; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: bold; color: #5c4033; top: ${coord.top || 'auto'}; bottom: ${coord.bottom || 'auto'}; left: ${coord.left || 'auto'}; right: ${coord.right || 'auto'}; width: ${coord.width}; height: ${coord.height};`;
         });
       }
-      else if (state.selectedTheme === 'patisserie') {
+   else if (state.selectedTheme === 'patisserie') {
         if (bgImg) bgImg.src = 'cake.png';
 
-        goalBox.style.cssText = "position: absolute; top: 4%; left: 11%; width: 62%; height: 14%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 12px; line-height: 1.25; color: #5c4033;";
+        // 大目標を上部「menu」横へ（横幅約2倍・フォント2倍）
+        goalBox.style.cssText = "position: absolute; top: 4%; left: 34%; width: 62%; height: 14%; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 18px; line-height: 1.25; color: #5c4033;";
 
+        // 8つの鍵（ドラッグで合わせた確定座標）
         const cakeCoords = [
-          {top: '25%', left: '12%', width: '24%', height: '13%'},
-          {top: '23%', right: '12%', width: '25%', height: '13%'},
-          {top: '40%', left: '10%', width: '24%', height: '13%'},
-          {top: '40%', right: '10%', width: '25%', height: '13%'},
-          {bottom: '22%', left: '10%', width: '24%', height: '13%'},
-          {bottom: '22%', right: '10%', width: '25%', height: '13%'},
-          {bottom: '7%', left: '32%', width: '36%', height: '12%'},
-          {top: '12%', right: '16%', width: '32%', height: '10%'}
+          {top: '42%', left: '41%', width: '24%', height: '13%'}, // map-key-box-0
+          {top: '19%', left: '72%', width: '25%', height: '13%'}, // map-key-box-1
+          {top: '22%', left: '0%', width: '24%', height: '13%'},  // map-key-box-2
+          {top: '34%', left: '72%', width: '25%', height: '13%'}, // map-key-box-3
+          {top: '60%', left: '0%', width: '24%', height: '13%'},  // map-key-box-4
+          {top: '57%', left: '71%', width: '25%', height: '13%'}, // map-key-box-5
+          {top: '45%', left: '0%', width: '36%', height: '12%'},  // map-key-box-6
+          {top: '83%', left: '0%', width: '24%', height: '13%'}   // map-key-box-7
         ];
         cakeCoords.forEach((coord, i) => {
           const box = document.getElementById(`map-key-box-${i}`);
